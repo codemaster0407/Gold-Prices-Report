@@ -9,3 +9,4 @@ __pycache__/
 # Ignore all .env files (environment variable files)
 .env
 *.env
+venv/*
