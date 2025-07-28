@@ -25,7 +25,7 @@ class DBConnect:
         with self.connection.cursor() as cursor:
             for entry in gold_price_entries:
                 sql = """
-                INSERT INTO gold_prices (price, country_id, gold_type, year, month, date, timestamp)
+                INSERT INTO gold_prices_countries (price, country_id, gold_type, year, month, date, timestamp)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
                 cursor.execute(sql, (
@@ -45,6 +45,18 @@ class DBConnect:
             print('[LOG] Database connection closed.')
         else:
             print('[LOG] No active database connection to close.')
+    
+    def fetch_country_id_from_string(self, country_name):
+
+        with self.connection.cursor() as cursor:
+            sql = "SELECT id FROM countries WHERE country_name = %s"
+            cursor.execute(sql, (country_name,))
+            result = cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                raise ValueError(f"Country '{country_name}' not found in the database.")
+        return None
 
 
 db_connection = DBConnect()
