@@ -1,0 +1,11 @@
+# Ignore Python cache folders
+__pycache__/
+*.py[cod]
+
+# Ignore cache directories or files (general cache)
+.cache/
+*.cache
+
+# Ignore all .env files (environment variable files)
+.env
+*.env
