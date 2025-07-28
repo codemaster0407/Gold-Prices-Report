@@ -1,0 +1,4 @@
+
+from populate_db_scripts.table_creation import create_gold_prices_table, create_country_table, populate_country_table
+
+create_gold_prices_table()
