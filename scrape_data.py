@@ -4,7 +4,7 @@ import config
 from utils import text_cleaner
 from datetime import datetime 
 from utils.db_connect import db_connection
-
+from selenium.webdriver.chrome.service import Service
 
 def fetch_india_gold_prices(soup):   
     """
@@ -100,7 +100,23 @@ def fetch_major_countries_gold_prices(soup):
 
 
 def initiate_driver(url = config.URL):
-    driver = webdriver.Chrome()  # Or use webdriver.Firefox()
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless=new')  # Run in headless mode
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--disable-dev-tools')
+    chrome_options.add_argument('--no-zygote')
+    chrome_options.add_argument('/opt/chrome/chrome-linux64/chrome')
+
+
+    service = Service(
+        executable_path= '/opt/chrome-driver/chromedriver-linux64/chrome',   # Path to your chromedriver
+        service_log_path = '/tmp/chromedriver.log'  # Optional: specify a log file for the service
+    )
+
+    driver = webdriver.Chrome(service = service, options = chrome_options)  # Or use webdriver.Firefox()
     driver.get(url)
 
     html = driver.page_source
