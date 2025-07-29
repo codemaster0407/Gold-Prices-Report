@@ -4,7 +4,9 @@ import config
 from utils import text_cleaner
 from datetime import datetime 
 from utils.db_connect import db_connection
-from selenium.webdriver.chrome.service import Service
+import tempfile
+
+
 
 def fetch_india_gold_prices(soup):   
     """
@@ -103,8 +105,10 @@ def initiate_driver(url = config.URL):
 
     
 
-
-    driver = webdriver.Chrome()  # Or use webdriver.Firefox()
+    options = webdriver.ChromeOptions()
+    user_data_dir = tempfile.mkdtemp()  # unique temp directory
+    options.add_argument(f"--user-data-dir={user_data_dir}")
+    driver = webdriver.Chrome(options=options)
     driver.get(url)
 
     html = driver.page_source
