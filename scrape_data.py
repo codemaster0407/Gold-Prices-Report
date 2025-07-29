@@ -125,7 +125,6 @@ def initiate_driver(url = config.URL):
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
-    print(soup)
 
     # Your parsing logic...
     india_gold_prices = fetch_india_gold_prices(soup)
