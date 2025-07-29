@@ -106,6 +106,8 @@ def initiate_driver(url = config.URL):
     
 
     options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # if you use headless mode
+
     user_data_dir = tempfile.mkdtemp()  # unique temp directory
     options.add_argument(f"--user-data-dir={user_data_dir}")
     driver = webdriver.Chrome(options=options)
