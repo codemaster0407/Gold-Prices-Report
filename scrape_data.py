@@ -20,9 +20,10 @@ def fetch_india_gold_prices(soup):
 
     current_gold_prices_dictionary = {}
     gold_types = []
+    print(gold_prices_sep_lit)
     for idx, entry in enumerate(gold_prices_sep_lit):
         try:
-            if idx % 2 == 0:
+            if idx % 3 == 0:
                 gold_type = gold_prices_sep_lit[idx]
                 gold_type = gold_type.replace(' ', '_')
                 gold_type = gold_type.replace('/g', '')
