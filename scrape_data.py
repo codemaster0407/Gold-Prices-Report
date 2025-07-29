@@ -8,6 +8,8 @@ import tempfile
 import undetected_chromedriver as uc
 import time 
 
+from selenium_stealth import stealth
+
 
 
 def fetch_india_gold_prices(soup):   
@@ -105,35 +107,19 @@ def fetch_major_countries_gold_prices(soup):
 
 def initiate_driver(url = config.URL):
     user_data_dir = tempfile.mkdtemp()  # unique profile for each session
-
-    options = uc.ChromeOptions()
-
-    # Add headless argument for EC2 use
-    options.add_argument("--headless=new")  # new headless mode used in Chrome 109+, or use "--headless" if older
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument(f"--user-data-dir={user_data_dir}")
-    
-    # Use a common, recent user agent string
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-    )
-    
-    # Reduce webdriver flags that reveal automation
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
     options.add_argument("--disable-blink-features=AutomationControlled")
-    
-    # Optional: set window size to a common desktop resolution
-    options.add_argument("--window-size=1920,1080")
-
-    # Instantiate undetected chromedriver with the above options
-    driver = uc.Chrome(options=options)
-
-    # Implicitly wait for elements (helps with dynamic content and Cloudflare)
-    driver.implicitly_wait(10)  
-
     driver = webdriver.Chrome(options=options)
+    
+    stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        fix_hairline=True)
+
     driver.get(url)
     time.sleep(5)
 
