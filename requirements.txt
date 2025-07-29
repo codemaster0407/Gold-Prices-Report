@@ -3,3 +3,4 @@ python-dotenv
 beautifulsoup4
 selenium 
 requests 
+undetected-chromedriver

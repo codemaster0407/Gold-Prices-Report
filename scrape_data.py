@@ -5,6 +5,8 @@ from utils import text_cleaner
 from datetime import datetime 
 from utils.db_connect import db_connection
 import tempfile
+import undetected_chromedriver as uc
+import time 
 
 
 
@@ -102,19 +104,42 @@ def fetch_major_countries_gold_prices(soup):
 
 
 def initiate_driver(url = config.URL):
+    user_data_dir = tempfile.mkdtemp()  # unique profile for each session
 
-    
+    options = uc.ChromeOptions()
 
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # if you use headless mode
-
-    user_data_dir = tempfile.mkdtemp()  # unique temp directory
+    # Add headless argument for EC2 use
+    options.add_argument("--headless=new")  # new headless mode used in Chrome 109+, or use "--headless" if older
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     options.add_argument(f"--user-data-dir={user_data_dir}")
+    
+    # Use a common, recent user agent string
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+    )
+    
+    # Reduce webdriver flags that reveal automation
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    
+    # Optional: set window size to a common desktop resolution
+    options.add_argument("--window-size=1920,1080")
+
+    # Instantiate undetected chromedriver with the above options
+    driver = uc.Chrome(options=options)
+
+    # Implicitly wait for elements (helps with dynamic content and Cloudflare)
+    driver.implicitly_wait(10)  
+
     driver = webdriver.Chrome(options=options)
     driver.get(url)
+    time.sleep(5)
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
+    print(soup)
 
     # Your parsing logic...
     india_gold_prices = fetch_india_gold_prices(soup)
