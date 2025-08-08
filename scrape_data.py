@@ -6,7 +6,7 @@ from datetime import datetime
 from utils.db_connect import db_connection
 import time 
 from selenium_stealth import stealth
-
+import tempfile 
 
 
 def fetch_india_gold_prices(soup):   
@@ -108,7 +108,7 @@ def initiate_driver(url = config.URL):
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--no-sandbox")  
     options.add_argument("--disable-dev-shm-usage")
-
+    options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
 
     driver = webdriver.Chrome(options=options)
     
