@@ -140,7 +140,7 @@ def initiate_driver(url):
         driver.get(url)
 
         # Explicitly wait until <title> element is present (or choose another element relevant to your page)
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
+        WebDriverWait(driver, 480).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
 
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
