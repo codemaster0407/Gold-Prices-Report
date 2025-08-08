@@ -159,6 +159,9 @@ def initiate_driver(url):
     except WebDriverException as e:
         logging.error(f"WebDriver error: {e}")
     except Exception as e:
+        import traceback 
+
+        traceback.print_exc()
         logging.error(f"Unexpected error: {e}")
     finally:
         if driver:
