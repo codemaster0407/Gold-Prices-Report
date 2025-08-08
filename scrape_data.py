@@ -4,10 +4,14 @@ import config
 from utils import text_cleaner
 from datetime import datetime 
 from utils.db_connect import db_connection
-import time 
 from selenium_stealth import stealth
 import tempfile 
-
+import logging 
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException, WebDriverException
 
 def fetch_india_gold_prices(soup):   
     """
@@ -101,47 +105,68 @@ def fetch_major_countries_gold_prices(soup):
     return gold_price_entries
   
 
-
-def initiate_driver(url = config.URL):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("--no-sandbox")  
+def initiate_driver(url):
+    logging.info("Starting ChromeDriver with headless Chrome on Linux VM...")
+    
+    options = Options()
+    options.add_argument("--headless=new")  # Use '--headless' if your Chrome version does not support '--headless=new'
+    options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-gpu")  # Sometimes helps in headless on Linux
     options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
 
-    driver = webdriver.Chrome(options=options)
-    
-    stealth(driver,
-        languages=["en-US", "en"],
-        vendor="Google Inc.",
-        platform="Win32",
-        webgl_vendor="Intel Inc.",
-        renderer="Intel Iris OpenGL Engine",
-        fix_hairline=True)
+    driver = None
+    try:
+        driver = webdriver.Chrome(options=options)
 
-    driver.get(url)
-    time.sleep(5)
+        # Apply stealth to mask Selenium fingerprint (update for Linux)
+        stealth(driver,
+                languages=["en-US", "en"],
+                vendor="Google Inc.",
+                platform="Linux x86_64",
+                webgl_vendor="Intel Open Source Technology Center",
+                renderer="Mesa DRI Intel(R) UHD Graphics 620 (Kabylake GT2)",
+                fix_hairline=True)
 
-    html = driver.page_source
-    soup = BeautifulSoup(html, 'html.parser')
+        driver.set_page_load_timeout(60)  # Timeout in seconds
 
-    print(f'[LOG] SOUP FETCH : {soup.title.string}')
+        logging.info(f"Navigating to {url} ...")
+        driver.get(url)
 
-    # Your parsing logic...
-    india_gold_prices = fetch_india_gold_prices(soup)
-    other_countries_gold_prices = fetch_major_countries_gold_prices(soup)
-    print(f'[LOG] Successfully fetched gold prices from the soup.')
-    print(f'[LOG] Successfully fetched data from {url}')
+        # Explicitly wait until <title> element is present (or choose another element relevant to your page)
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
 
-    print(f'[LOG] Dumping data to the database...')
-    db_connection.dump_gold_prices(india_gold_prices)
-    db_connection.dump_gold_prices(other_countries_gold_prices)
-    print(f'[LOG] Data dumped successfully.')
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
 
+        logging.info(f'[LOG] SOUP FETCH : {soup.title.string}')
 
-    db_connection.close_connection()
-    driver.quit()
+        # Your custom scraping/parsing functions
+        india_gold_prices = fetch_india_gold_prices(soup)
+        other_countries_gold_prices = fetch_major_countries_gold_prices(soup)
+
+        logging.info(f'[LOG] Successfully fetched gold prices from the soup.')
+        logging.info(f'[LOG] Successfully fetched data from {url}')
+
+        logging.info(f'[LOG] Dumping data to the database...')
+        db_connection.dump_gold_prices(india_gold_prices)
+        db_connection.dump_gold_prices(other_countries_gold_prices)
+        logging.info(f'[LOG] Data dumped successfully.')
+
+    except TimeoutException:
+        logging.error("Timeout waiting for page to load or element to appear.")
+    except WebDriverException as e:
+        logging.error(f"WebDriver error: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+    finally:
+        if driver:
+            driver.quit()
+        db_connection.close_connection()
+        logging.info("Driver and DB connection closed.")
 
 if __name__ == "__main__":
-    initiate_driver()
+    import config
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
+    initiate_driver(config.URL)
