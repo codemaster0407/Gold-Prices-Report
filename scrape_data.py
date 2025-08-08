@@ -113,6 +113,7 @@ def initiate_driver(url):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-blink-features=AutomationControlled")
+    options.page_load_strategy = 'eager'
     options.add_argument("--disable-gpu")  # Sometimes helps in headless on Linux
     options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
 
@@ -129,7 +130,11 @@ def initiate_driver(url):
                 renderer="Mesa DRI Intel(R) UHD Graphics 620 (Kabylake GT2)",
                 fix_hairline=True)
 
-        driver.set_page_load_timeout(60)  # Timeout in seconds
+        driver.set_page_load_timeout(480)    # increase if needed
+        driver.set_script_timeout(120)
+        driver.implicitly_wait(20)           # implicitly wait for elements before errors
+
+        # driver.set_page_load_timeout(60)  # Timeout in seconds
 
         logging.info(f"Navigating to {url} ...")
         driver.get(url)
