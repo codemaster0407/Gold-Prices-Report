@@ -4,10 +4,7 @@ import config
 from utils import text_cleaner
 from datetime import datetime 
 from utils.db_connect import db_connection
-import tempfile
-import undetected_chromedriver as uc
 import time 
-
 from selenium_stealth import stealth
 
 
@@ -106,7 +103,6 @@ def fetch_major_countries_gold_prices(soup):
 
 
 def initiate_driver(url = config.URL):
-    user_data_dir = tempfile.mkdtemp()  # unique profile for each session
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--disable-blink-features=AutomationControlled")
